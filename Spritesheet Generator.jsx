@@ -47,20 +47,20 @@ function SpriteGenerator()
                 currentRow = 0;
             for (var i = 0; i < numberOfLayers; i++)
             {
-               if (dlg.panel.useLayerSet.value)
-               {
+                if (dlg.panel.useLayerSet.value)
+                {
                     currentDoc.activeLayer.layers[i].duplicate(spriteSheetDoc);
-               }
-               else
-               {
+                }
+                else
+                {
                    currentDoc.layers[i].duplicate(spriteSheetDoc);
-               }
-               currentColumn++;
-           
-               if (currentColumn >= columns) {
+                }
+                currentColumn++;
+
+                if (currentColumn >= columns) {
                    currentRow++;
                    currentColumn = 0;
-               }
+                }
             }
             
             app.activeDocument = spriteSheetDoc;
@@ -70,23 +70,24 @@ function SpriteGenerator()
             
             // Move the layers into respective grid positions
             currentColumn = currentRow = 0;
+            var reverse = dlg.panel.reverseLayerOrder.value;
             for (var i = 0; i < numberOfLayers; i++)
             {
-               app.activeDocument.layers[i].translate(spriteWidth * currentColumn, spriteHeight * currentRow);
-               
-               currentColumn++;
-           
-               if (currentColumn >= columns) {
+                app.activeDocument.layers[reverse ? (numberOfLayers - 1 - i) : i].translate(spriteWidth * currentColumn, spriteHeight * currentRow);
+
+                currentColumn++;
+
+                if (currentColumn >= columns) {
                    currentRow++;
                    currentColumn = 0;
-               }
+                }
             }
             
             dlg.close();
         }
         catch (ex)
         {
-            alert("A nasty error occurred");
+            alert("A nasty error occurred: ", + ex);
         }
     }
 
@@ -110,6 +111,8 @@ function SpriteGenerator()
         
         dlg.panel.useLayerSet = dlg.panel.add('Checkbox', undefined, 'Use children of selected layer group (use if your layers are in a group that you have currently selected)');
         dlg.panel.useLayerSet.addEventListener('click', onUseLayerSetChange);
+
+        dlg.panel.reverseLayerOrder = dlg.panel.add('Checkbox', undefined, 'Use top to bottom order');
         
         dlg.panel.add('StaticText', undefined, 'Sheet Name: ');
         dlg.panel.sheetName = dlg.panel.add('EditText', undefined, sheetName);
