@@ -7,33 +7,18 @@ function SpriteGenerator()
 {
     var dlg,
         sheetName,
+        frames = 1,
         currentDoc,
-        numberOfLayers,
-        columns,
-        rows,
+        columns = 4,
+        rows = 4,
         spriteWidth,
         spriteHeight;
-
-    function calculateColRowVals()
-    {
-        rows = Math.round (Math.sqrt (numberOfLayers));
-        columns = Math.ceil (numberOfLayers / rows);
-    }
-    
-    function exit() { dlg.close(); }
 
     function createSpriteSheet()
     {
         try
         {
             dlg.hide();
-            
-            // Check if selected layer is truly a set if option selected
-            if (dlg.panel.useLayerSet.value && (!currentDoc.activeLayer.layers || !(currentDoc.activeLayer.layers.length > 0)))
-            {
-                alert("Please select a group that contains at least one element");
-                return ;
-            }
             
             columns = dlg.panel.columns.text;
             rows = dlg.panel.rows.text;
@@ -42,47 +27,37 @@ function SpriteGenerator()
             var spriteSheetDoc = app.documents.add(spriteWidth * columns, spriteHeight * rows, 72, sheetName);
             app.activeDocument = currentDoc;
            
-            // Copy all the layers to the new document
             var currentColumn = 0,
                 currentRow = 0;
-            for (var i = 0; i < numberOfLayers; i++)
+
+            if (frames > 0)
             {
-                if (dlg.panel.useLayerSet.value)
+                for (var i = 0; i < frames; i++)
                 {
-                    currentDoc.activeLayer.layers[i].duplicate(spriteSheetDoc);
-                }
-                else
-                {
-                   currentDoc.layers[i].duplicate(spriteSheetDoc);
-                }
-                currentColumn++;
+                    selectFrame(i + 1);
+                    var layersToCopy = getVisibleLayers(currentDoc.layers);
 
-                if (currentColumn >= columns) {
-                   currentRow++;
-                   currentColumn = 0;
+                    for (var j = 0; j < layersToCopy.length; j++)
+                    {
+                        var duplicatedLayer = layersToCopy[j].duplicate(spriteSheetDoc);
+                        app.activeDocument = spriteSheetDoc;
+                        duplicatedLayer.translate(spriteWidth * currentColumn, spriteHeight * currentRow);
+                        app.activeDocument = currentDoc;
+                    }
+
+                    currentColumn++;
+
+                    if (currentColumn >= columns) {
+                       currentRow++;
+                       currentColumn = 0;
+                    }
                 }
+
+                app.activeDocument = spriteSheetDoc;
+                // Remove the default background layer
+                app.activeDocument.artLayers.getByName(app.activeDocument.backgroundLayer.name).remove();
             }
-            
-            app.activeDocument = spriteSheetDoc;
-            
-            // Remove the default background layer
-            app.activeDocument.artLayers.getByName(app.activeDocument.backgroundLayer.name).remove();
-            
-            // Move the layers into respective grid positions
-            currentColumn = currentRow = 0;
-            var reverse = dlg.panel.reverseLayerOrder.value;
-            for (var i = 0; i < numberOfLayers; i++)
-            {
-                app.activeDocument.layers[reverse ? (numberOfLayers - 1 - i) : i].translate(spriteWidth * currentColumn, spriteHeight * currentRow);
 
-                currentColumn++;
-
-                if (currentColumn >= columns) {
-                   currentRow++;
-                   currentColumn = 0;
-                }
-            }
-            
             dlg.close();
         }
         catch (ex)
@@ -91,11 +66,45 @@ function SpriteGenerator()
         }
     }
 
-    function onUseLayerSetChange(e)
+    function selectFrame(number)
     {
-        if (!currentDoc.activeLayer.layers) return;
-        
-        numberOfLayers = e.target.value ? currentDoc.activeLayer.layers.length : currentDoc.layers.length;
+        var idslct = charIDToTypeID( "slct" );
+        var desc = new ActionDescriptor();
+        var idnull = charIDToTypeID( "null" );
+        var ref = new ActionReference();
+        var idanimationFrameClass = stringIDToTypeID( "animationFrameClass" );
+        ref.putIndex( idanimationFrameClass, number );
+        desc.putReference( idnull, ref );
+        executeAction( idslct, desc, DialogModes.NO );
+    }
+
+    function getVisibleLayers(layers)
+    {
+        var result = [];
+        for (var i = 0; i < layers.length; i++)
+        {
+            var layer = layers[i];
+            if (layer.visible)
+            {
+                result.push(layer);
+            }
+        }
+
+        return result;
+    }
+
+    /***
+    /* Window setup and prep calculations
+    /**/
+    function calculateColRowVals()
+    {
+        rows = Math.round (Math.sqrt (frames));
+        columns = Math.ceil (frames / rows);
+    }
+
+    function onFramesChange(e)
+    {
+        frames = parseInt(dlg.panel.frames.text);
         
         calculateColRowVals();
         
@@ -103,16 +112,18 @@ function SpriteGenerator()
         dlg.panel.columns.text = columns;
     }
 
+    function exit() { dlg.close(); }
+
     function createWindow()
     {
         dlg = new Window('dialog', 'Spritesheet generator');
 
         dlg.panel = dlg.add('panel', undefined, undefined);
         
-        dlg.panel.useLayerSet = dlg.panel.add('Checkbox', undefined, 'Use children of selected layer group (use if your layers are in a group that you have currently selected)');
-        dlg.panel.useLayerSet.addEventListener('click', onUseLayerSetChange);
-
-        dlg.panel.reverseLayerOrder = dlg.panel.add('Checkbox', undefined, 'Use top to bottom order');
+        dlg.panel.add('StaticText', undefined, 'Last frame number: ');
+        dlg.panel.frames = dlg.panel.add('EditText', undefined, frames);
+        dlg.panel.frames.characters = 3;
+        dlg.panel.frames.onChange = onFramesChange;
         
         dlg.panel.add('StaticText', undefined, 'Sheet Name: ');
         dlg.panel.sheetName = dlg.panel.add('EditText', undefined, sheetName);
@@ -141,16 +152,15 @@ function SpriteGenerator()
     function init()
     {
         currentDoc = app.activeDocument;
-        numberOfLayers= currentDoc.layers.length;
         sheetName = currentDoc.name.split('.')[0];
         spriteWidth = currentDoc.width;
         spriteHeight = currentDoc.height;
 
-        calculateColRowVals ();
+        calculateColRowVals();
         
         createWindow();
     }
- 
+
     init();
 }
 
