@@ -41,7 +41,10 @@ function SpriteGenerator()
                     {
                         var duplicatedLayer = layersToCopy[j].duplicate(spriteSheetDoc);
                         app.activeDocument = spriteSheetDoc;
-                        duplicatedLayer.translate(spriteWidth * currentColumn, spriteHeight * currentRow);
+
+                        if (layerHasBounds(duplicatedLayer))
+                            duplicatedLayer.translate(spriteWidth * currentColumn, spriteHeight * currentRow);
+
                         app.activeDocument = currentDoc;
                     }
 
@@ -62,7 +65,7 @@ function SpriteGenerator()
         }
         catch (ex)
         {
-            alert("A nasty error occurred: ", + ex);
+            alert("An error occured within the script: ", + ex);
         }
     }
 
@@ -91,6 +94,11 @@ function SpriteGenerator()
         }
 
         return result;
+    }
+
+    function layerHasBounds(layer)
+    {
+        return !(layer.bounds[2] == 0 && layer.bounds[3] == 0);
     }
 
     /***
