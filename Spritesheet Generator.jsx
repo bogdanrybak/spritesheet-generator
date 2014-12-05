@@ -25,8 +25,9 @@ function SpriteGenerator()
             sheetName = dlg.panel.sheetName.text + "_" + currentDoc.width.value + "x" + currentDoc.height.value;
             
             var spriteSheetDoc = app.documents.add(spriteWidth * columns, spriteHeight * rows, 72, sheetName);
-            app.activeDocument = currentDoc;
-           
+            var tempDoc = app.documents.add(spriteWidth, spriteHeight, 72, sheetName + "_tmp");
+            var cellSize = getSelectionShape(spriteWidth, 0, spriteHeight, 0);
+
             var currentColumn = 0,
                 currentRow = 0;
 
@@ -34,27 +35,42 @@ function SpriteGenerator()
             {
                 for (var i = 0; i < frames; i++)
                 {
+                    app.activeDocument = currentDoc;
                     selectFrame(i + 1);
-                    var layersToCopy = getVisibleLayers(currentDoc.layers);
+                    app.activeDocument.selection.select(cellSize);
 
-                    for (var j = 0; j < layersToCopy.length; j++)
+                    // Only way at the moment to check for empty selection is to catch the exception
+                    var selectionIsEmpty = false;
+                    try { app.activeDocument.selection.copy(true); }
+                    catch (ex) { selectionIsEmpty = true; }
+
+                    if (!selectionIsEmpty)
                     {
-                        var duplicatedLayer = layersToCopy[j].duplicate(spriteSheetDoc);
+                        app.activeDocument = tempDoc;
+                        app.activeDocument.selection.select(cellSize);
+
+                        // paste in place might not work in versions below CS5
+                        pasteInPlace();
+                        var layer = app.activeDocument.activeLayer.duplicate(spriteSheetDoc);
+
                         app.activeDocument = spriteSheetDoc;
-
-                        if (layerHasBounds(duplicatedLayer))
-                            duplicatedLayer.translate(spriteWidth * currentColumn, spriteHeight * currentRow);
-
-                        app.activeDocument = currentDoc;
+                        layer.translate(currentColumn * spriteWidth, currentRow * spriteHeight);
                     }
 
                     currentColumn++;
 
-                    if (currentColumn >= columns) {
+                    if (currentColumn >= columns)
+                    {
                        currentRow++;
                        currentColumn = 0;
                     }
                 }
+
+                app.activeDocument = tempDoc;
+                app.activeDocument.close(SaveOptions.DONOTSAVECHANGES);
+
+                app.activeDocument = currentDoc;
+                app.activeDocument.selection.deselect();
 
                 app.activeDocument = spriteSheetDoc;
                 // Remove the default background layer
@@ -65,7 +81,7 @@ function SpriteGenerator()
         }
         catch (ex)
         {
-            alert("An error occured within the script: ", + ex);
+            alert("An error occured, please submit a bug report. Error: " + ex);
         }
     }
 
@@ -81,26 +97,32 @@ function SpriteGenerator()
         executeAction( idslct, desc, DialogModes.NO );
     }
 
-    function getVisibleLayers(layers)
+    function getSelectionShape(width, column, height, row)
     {
-        var result = [];
-        for (var i = 0; i < layers.length; i++)
-        {
-            var layer = layers[i];
-            if (layer.visible)
-            {
-                result.push(layer);
-            }
-        }
+        var shape =
+        [
+            [column * width, row * height], // top left
+            [column * width, row * height + height], // bottom left
+            [column * width + width, row * height + height], // bottom right
+            [column * width + width, row * height] // top right
+        ];
 
-        return result;
+        return shape;
     }
 
-    function layerHasBounds(layer)
+    function pasteInPlace()
     {
-        return !(layer.bounds[2] == 0 && layer.bounds[3] == 0);
+        var idpast = charIDToTypeID( "past" );
+        var desc4 = new ActionDescriptor();
+        var idinPlace = stringIDToTypeID( "inPlace" );
+        desc4.putBoolean( idinPlace, true );
+        var idAntA = charIDToTypeID( "AntA" );
+        var idAnnt = charIDToTypeID( "Annt" );
+        var idAnno = charIDToTypeID( "Anno" );
+        desc4.putEnumerated( idAntA, idAnnt, idAnno );
+        executeAction( idpast, desc4, DialogModes.NO );
     }
-
+    
     /***
     /* Window setup and prep calculations
     /**/
