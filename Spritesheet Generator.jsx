@@ -14,7 +14,7 @@ function SpriteGenerator()
         spriteWidth,
         spriteHeight;
 
-    function createSpriteSheet()
+    function createSpriteSheet(onFinished)
     {
         try
         {
@@ -75,6 +75,11 @@ function SpriteGenerator()
                 app.activeDocument = spriteSheetDoc;
                 // Remove the default background layer
                 app.activeDocument.artLayers.getByName(app.activeDocument.backgroundLayer.name).remove();
+                
+                if (onFinished)
+                {
+                    onFinished(spriteSheetDoc, currentDoc);
+                }
             }
 
             dlg.close();
@@ -142,6 +147,81 @@ function SpriteGenerator()
         dlg.panel.columns.text = columns;
     }
 
+    function saveAsPNG()
+    {
+        var selectedFile = File.openDialog("Save as PNG","*.png");
+        if (selectedFile == null) { return; }
+        
+        var finished = function(spriteSheet, originalDoc) {
+            var o = new ExportOptionsSaveForWeb();
+            o.format = SaveDocumentType.PNG;
+            o.PNG8 = false;
+            o.transparency = true;
+            o.interlaced = false;
+            o.includeProfile = false;
+            
+            spriteSheet.exportDocument(selectedFile, ExportType.SAVEFORWEB, o);
+            
+            saveSizeData(selectedFile)
+            
+            spriteSheet.close(SaveOptions.DONOTSAVECHANGES);
+            app.activeDocument = originalDoc;
+        }
+        
+        createSpriteSheet(finished);
+    }
+
+    function saveSizeData(pngPath)
+    {
+        var f = File(pngPath.path + '/spritesheets.txt');
+        
+        f.encoding = 'UTF8';
+        f.open('r');
+        var contents = f.read();
+        f.close();
+        
+        var dataToWrite = pngPath.name + ',' + spriteWidth.value + ',' + spriteHeight.value + ',' + frames;
+        var lines;
+        
+        if (contents.length > 0)
+        {
+            lines = contents.split('\n');
+            var replaced = false;
+            for (var i = 0; i < lines.lenght; i++)
+            {
+                if (lines[i].lenght < 1) { continue; }
+                
+                if (lines[i].indexOf(pngPath.name) > -1)
+                {
+                    lines[i] = dataToWrite;
+                    replaced = true;
+                    break;
+                }
+            }
+        
+            if (!replaced)
+            {
+                lines.push(dataToWrite);
+            }
+        }
+        else
+        {
+            lines = [dataToWrite];
+        }
+        
+        contents = "";
+        for (var i = 0; i < lines.length; i++)
+        {
+            contents += lines[i];
+            
+            if (i < lines.length - 1) { contents += '\n'; }
+        }
+        
+        f.open('w');
+        f.write(contents);
+        f.close();
+    }
+
     function exit() { dlg.close(); }
 
     function createWindow()
@@ -174,7 +254,9 @@ function SpriteGenerator()
 
         dlg.buttons.createButton = dlg.buttons.add('button', undefined, 'Generate');
         dlg.buttons.createButton.onClick = createSpriteSheet;
-        dlg.buttons.cancel.alignment = ['right', 'bottom'];
+        
+        dlg.buttons.saveAsPNGBtn = dlg.buttons.add('button', undefined, 'Generate and Save as PNG');
+        dlg.buttons.saveAsPNGBtn.onClick = saveAsPNG;
         
         dlg.show();
     }
@@ -203,9 +285,9 @@ if (app && app.activeDocument)
 
     app.preferences.typeUnits = TypeUnits.PIXELS;
     app.preferences.rulerUnits = Units.PIXELS;
-    
+   
     var spriteGenerator = new SpriteGenerator();
-    
+
     app.preferences.typeUnits = savedPrefs.typeUnits;
     app.preferences.rulerUnits = savedPrefs.rulerUnits;
 }
