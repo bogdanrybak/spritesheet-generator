@@ -7,6 +7,7 @@ function SpriteGenerator()
 {
     var dlg,
         sheetName,
+        dataFileName = '_spritesheets.txt',
         frames = 1,
         currentDoc,
         columns = 4,
@@ -20,9 +21,10 @@ function SpriteGenerator()
         {
             dlg.hide();
             
-            columns = dlg.panel.columns.text;
-            rows = dlg.panel.rows.text;
-            sheetName = dlg.panel.sheetName.text + "_" + currentDoc.width.value + "x" + currentDoc.height.value;
+            columns = dlg.columns.text;
+            rows = dlg.rows.text;
+            sheetName = dlg.sheetName.text + "_" + currentDoc.width.value + "x" + currentDoc.height.value;
+            var startFrame = parseInt(dlg.startFrame.text);
             
             var spriteSheetDoc = app.documents.add(spriteWidth * columns, spriteHeight * rows, 72, sheetName);
             var tempDoc = app.documents.add(spriteWidth, spriteHeight, 72, sheetName + "_tmp");
@@ -36,7 +38,7 @@ function SpriteGenerator()
                 for (var i = 0; i < frames; i++)
                 {
                     app.activeDocument = currentDoc;
-                    selectFrame(i + 1);
+                    selectFrame(startFrame + i);
                     app.activeDocument.selection.select(cellSize);
 
                     // Only way at the moment to check for empty selection is to catch the exception
@@ -82,7 +84,7 @@ function SpriteGenerator()
                 }
             }
 
-            dlg.close();
+            exit();
         }
         catch (ex)
         {
@@ -139,12 +141,12 @@ function SpriteGenerator()
 
     function onFramesChange(e)
     {
-        frames = parseInt(dlg.panel.frames.text);
+        frames = parseInt(dlg.endFrame.text) - parseInt(dlg.startFrame.text) + 1;
         
         calculateColRowVals();
         
-        dlg.panel.rows.text = rows;
-        dlg.panel.columns.text = columns;
+        dlg.rows.text = rows;
+        dlg.columns.text = columns;
     }
 
     function saveAsPNG()
@@ -162,7 +164,10 @@ function SpriteGenerator()
             
             spriteSheet.exportDocument(selectedFile, ExportType.SAVEFORWEB, o);
             
-            saveSizeData(selectedFile)
+            if (dlg.saveData.value == true)
+            {
+                saveSizeData(selectedFile);
+            }
             
             spriteSheet.close(SaveOptions.DONOTSAVECHANGES);
             app.activeDocument = originalDoc;
@@ -173,7 +178,7 @@ function SpriteGenerator()
 
     function saveSizeData(pngPath)
     {
-        var f = File(pngPath.path + '/_spritesheets.txt');
+        var f = File(pngPath.path + '/' + dataFileName);
         
         f.encoding = 'UTF8';
         f.open('r');
@@ -187,9 +192,9 @@ function SpriteGenerator()
         {
             lines = contents.split('\n');
             var replaced = false;
-            for (var i = 0; i < lines.lenght; i++)
+            for (var i = 0; i < lines.length; i++)
             {
-                if (lines[i].lenght < 1) { continue; }
+                if (lines[i].length < 1) { continue; }
                 
                 if (lines[i].indexOf(pngPath.name) > -1)
                 {
@@ -230,33 +235,49 @@ function SpriteGenerator()
 
         dlg.panel = dlg.add('panel', undefined, undefined);
         
-        dlg.panel.add('StaticText', undefined, 'Last frame number: ');
-        dlg.panel.frames = dlg.panel.add('EditText', undefined, frames);
-        dlg.panel.frames.characters = 3;
-        dlg.panel.frames.onChange = onFramesChange;
+        dlg.frameGroup = dlg.panel.add('group');
+        dlg.frameGroup.alignment = ['left', 'top'];
         
-        dlg.panel.add('StaticText', undefined, 'Sheet Name: ');
-        dlg.panel.sheetName = dlg.panel.add('EditText', undefined, sheetName);
-        dlg.panel.sheetName.characters = 40;
+        dlg.frameGroup.add('StaticText', undefined, 'Start frame ');
+        dlg.startFrame = dlg.frameGroup.add('EditText', undefined, 1);
+        dlg.startFrame.characters = 3;
+        dlg.startFrame.onChange = onFramesChange;
         
-        dlg.panel.add('StaticText', undefined, 'Columns: ');
-        dlg.panel.columns = dlg.panel.add('EditText', undefined, columns);
-        dlg.panel.columns.characters = 4;
+        dlg.frameGroup.add('StaticText', undefined, 'End frame ');
+        dlg.endFrame = dlg.frameGroup.add('EditText', undefined, 1);
+        dlg.endFrame.characters = 3;
+        dlg.endFrame.onChange = onFramesChange;
         
-        dlg.panel.add('StaticText', undefined, 'Rows: ');
-        dlg.panel.rows = dlg.panel.add('EditText', undefined, rows);
-        dlg.panel.rows.characters = 4;
+        dlg.dimensionsGroup = dlg.panel.add('group');
+        dlg.dimensionsGroup.alignment = ['left', 'top'];
+        
+        dlg.dimensionsGroup.add('StaticText', undefined, 'Columns ');
+        dlg.columns = dlg.dimensionsGroup.add('EditText', undefined, columns);
+        dlg.columns.characters = 4;
+        
+        dlg.dimensionsGroup.add('StaticText', undefined, 'Rows ');
+        dlg.rows = dlg.dimensionsGroup.add('EditText', undefined, rows);
+        dlg.rows.characters = 4;
+        
+        dlg.panel.docName = dlg.panel.add('StaticText', undefined, 'Document Name ');
+        dlg.panel.docName.alignment = ['left', 'top'];
+        dlg.sheetName = dlg.panel.add('EditText', undefined, sheetName);
+        dlg.sheetName.characters = 40;
         
         dlg.buttons = dlg.add('group');
         dlg.buttons.cancel = dlg.buttons.add('button', undefined, 'Cancel');
         dlg.buttons.cancel.onClick = exit;
-        dlg.buttons.cancel.alignment = ['left', 'bottom'];
 
-        dlg.buttons.createButton = dlg.buttons.add('button', undefined, 'Generate');
+        dlg.buttons.createButton = dlg.buttons.add('button', undefined, 'Generate document');
         dlg.buttons.createButton.onClick = createSpriteSheet;
         
-        dlg.buttons.saveAsPNGBtn = dlg.buttons.add('button', undefined, 'Generate and Save as PNG');
+        dlg.buttons.saveAsPNGBtn = dlg.buttons.add('button', undefined, 'Save as PNG');
         dlg.buttons.saveAsPNGBtn.onClick = saveAsPNG;
+        
+        dlg.saveDataGroup = dlg.add('group');
+        dlg.saveData = dlg.saveDataGroup.add('Checkbox', undefined, 'Save data to ' + dataFileName + ' when saving as PNG');
+
+        dlg.saveData.value = true;
         
         dlg.show();
     }
