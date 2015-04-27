@@ -173,7 +173,7 @@ function SpriteGenerator()
 
     function saveSizeData(pngPath)
     {
-        var f = File(pngPath.path + '/spritesheets.txt');
+        var f = File(pngPath.path + '/_spritesheets.txt');
         
         f.encoding = 'UTF8';
         f.open('r');
