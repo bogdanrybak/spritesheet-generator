@@ -151,7 +151,7 @@ function SpriteGenerator()
 
     function saveAsPNG()
     {
-        var selectedFile = File.openDialog("Save as PNG","*.png");
+        var selectedFile = File.saveDialog("Save as PNG", "*.png");
         if (selectedFile == null) { return; }
         
         var finished = function(spriteSheet, originalDoc) {
