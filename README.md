@@ -6,7 +6,10 @@ Report issues / feature requests on [github](https://github.com/bogdanrybak/spri
 
 # Installation
 
-Place the Spritesheet generator.jsx script into:
+Save the raw version of the script
+https://raw.githubusercontent.com/bogdanrybak/spritesheet-generator/master/Spritesheet%20Generator.jsx
+
+Place Spritesheet generator.jsx script into:
 
 - Windows - C:\Program Files\Adobe\Your photoshop version\Presets\Scripts
 - Mac - Applications > Your photoshop version > Presets > Scripts
