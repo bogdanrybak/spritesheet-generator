@@ -41,3 +41,7 @@ each entry uses a new line
 ```
 
 This file exists so that you can setup whatever workflow within your game engine or other tools to read and slice your spritesheets.
+
+# TODO
+* The padding option needs to be initialized with a valid option
+* the data file does not contain the padding option yet
