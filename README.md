@@ -7,19 +7,21 @@ Report issues / feature requests on [github](https://github.com/bogdanrybak/spri
 # Installation
 
 Save the raw version of the script
-https://raw.githubusercontent.com/bogdanrybak/spritesheet-generator/master/Spritesheet%20Generator.jsx
+
+[Spritesheet Generator.zip](https://github.com/bogdanrybak/spritesheet-generator/files/2476339/Spritesheet.Generator.zip)
+
 
 Place Spritesheet generator.jsx script into:
 
-- Windows - C:\Program Files\Adobe\Your photoshop version\Presets\Scripts
-- Mac - Applications > Your photoshop version > Presets > Scripts
+- **Windows** - C:\Program Files\Adobe\Your photoshop version\Presets\Scripts
+- **Mac** - Applications > Your photoshop version > Presets > Scripts
 
 Restart Photoshop if it was open.
 
 # Usage
 The script will now be available under File -> Scripts menu as "Spritesheet Generator".
 
-![Screenshot](http://i.imgur.com/kpMYPm1.png)
+![screenshot](https://user-images.githubusercontent.com/20757517/46916204-efa99c80-cfe9-11e8-827f-bf9ddc31d03f.PNG)
 
 You can specify the frame range. The columns and rows will be automaticaly calculated - you can change them to suit your needs.
 
@@ -31,17 +33,14 @@ Export options:
 # Sprite sheet data file
 _spritesheets.txt will be created / updated everytime you use **Save as PNG** option and will store sprite sheet information for all generated pngs in the folder it resides. The generated _spritesheets.txt format is:
 ```
-spritename,cell width,cell height,number of frames
+spritename,cell width,cell height,padding left,padding top,padding right,padding bottom,number of frames
 
 for example:
-basic_attack.png,32,32,5
-basic_attack_1.png,32,34,3
+basic_attack.png,32,32,1,2,3,4,5
+basic_attack_1.png,32,34,1,2,3,4,3
+DustAnimationExample.png,18,6,1,1,1,1,1
 
 each entry uses a new line
 ```
 
 This file exists so that you can setup whatever workflow within your game engine or other tools to read and slice your spritesheets.
-
-# TODO
-* The padding option needs to be initialized with a valid option
-* the data file does not contain the padding option yet
