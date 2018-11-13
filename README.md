@@ -6,9 +6,7 @@ Report issues / feature requests on [github](https://github.com/bogdanrybak/spri
 
 # Installation
 
-Save the raw version of the script
-
-[Spritesheet Generator.zip](https://github.com/bogdanrybak/spritesheet-generator/files/2476339/Spritesheet.Generator.zip)
+[Download](https://github.com/bogdanrybak/spritesheet-generator/files/2476339/Spritesheet.Generator.zip) the raw version of the script
 
 
 Place Spritesheet generator.jsx script into:
@@ -21,9 +19,11 @@ Restart Photoshop if it was open.
 # Usage
 The script will now be available under File -> Scripts menu as "Spritesheet Generator".
 
-![screenshot](https://user-images.githubusercontent.com/20757517/46916204-efa99c80-cfe9-11e8-827f-bf9ddc31d03f.PNG)
+![capture](https://user-images.githubusercontent.com/20757517/48396159-7de18180-e754-11e8-8749-5996be26bfb3.PNG)
 
 You can specify the frame range. The columns and rows will be automaticaly calculated - you can change them to suit your needs.
+
+You also have the option to add padding in between frames to avoid bleeding. The padding information will be included in the data file if you check the "Save Padding Data" checkbox.
 
 Export options:
 
@@ -33,12 +33,22 @@ Export options:
 # Sprite sheet data file
 _spritesheets.txt will be created / updated everytime you use **Save as PNG** option and will store sprite sheet information for all generated pngs in the folder it resides. The generated _spritesheets.txt format is:
 ```
-spritename,cell width,cell height,padding left,padding top,padding right,padding bottom,number of frames
 
-for example:
-basic_attack.png,32,32,1,2,3,4,5
-basic_attack_1.png,32,34,1,2,3,4,3
-DustAnimationExample.png,18,6,1,1,1,1,1
+spritename,cell width,cell height(,padding left,padding top,padding right,padding bottom),number of frames
+
+for example,
+  without Save Padding Data (default):
+  
+basic_attack.png,32,32,4
+basic_attack_1.png,32,32,4
+DustAnimationExample.png,18,6,4
+
+  with Save Padding Data:
+  
+basic_attack.png,32,32,0,1,2,3,4 
+basic_attack_1.png,32,32,2,2,2,4
+DustAnimationExample.png,18,6,1,1,1,1,
+
 
 each entry uses a new line
 ```
