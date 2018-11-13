@@ -1,1 +1,1 @@
-DustAnimationOutput.png,18,6,4
+DustAnimationOutput.png,22,10,4
