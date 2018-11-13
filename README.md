@@ -6,7 +6,7 @@ Report issues / feature requests on [github](https://github.com/bogdanrybak/spri
 
 # Installation
 
-[Download](https://github.com/bogdanrybak/spritesheet-generator/files/2476339/Spritesheet.Generator.zip) the raw version of the script
+[Download](https://github.com/bogdanrybak/spritesheet-generator/files/2575019/spritesheet-generator.zip) the raw version of the script
 
 
 Place Spritesheet generator.jsx script into:
