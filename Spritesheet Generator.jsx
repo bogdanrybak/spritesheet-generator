@@ -25,6 +25,7 @@ function SpriteGenerator()
       paddingRight = 0,
       paddingTop = 0,
       paddingBottom = 0,
+      savePaddingData,
       spriteWidth,
       spriteHeight;
 
@@ -226,9 +227,14 @@ function SpriteGenerator()
         
         var dataToWrite = 
             pngPath.name + ','
-            + spriteWidth.value + ',' + spriteHeight.value + ','
-            + paddingLeft + ',' + paddingTop + ',' + paddingRight + ',' + paddingBottom + ','
-            + frames;
+            + spriteWidth.value + ',' + spriteHeight.value + ',';
+        
+        if(dlg.savePaddingData.value)
+        {
+            dataToWrite += paddingLeft + ',' + paddingTop + ',' + paddingRight + ',' + paddingBottom + ',';
+        }
+            
+        dataToWrite += frames;
         var lines;
         
         if (contents.length > 0)
@@ -278,6 +284,8 @@ function SpriteGenerator()
 
         dlg.panel = dlg.add('panel', undefined, undefined);
         
+        // Frames
+
         dlg.frameGroup = dlg.panel.add('group');
         dlg.frameGroup.alignment = ['left', 'top'];
         
@@ -291,6 +299,8 @@ function SpriteGenerator()
         dlg.endFrame.characters = 3;
         dlg.endFrame.onChange = onFramesChange;
         
+        // Sizes
+
         dlg.dimensionsGroup = dlg.panel.add('group');
         dlg.dimensionsGroup.alignment = ['left', 'top'];
         
@@ -302,15 +312,17 @@ function SpriteGenerator()
         dlg.rows = dlg.dimensionsGroup.add('EditText', undefined, rows);
         dlg.rows.characters = 4;
         
+        // Padding
         
-        dlg.paddingGroup = dlg.panel.add('group');
-        dlg.paddingGroup.alignment = ['left','top'];
+        dlg.paddingTypePanel = dlg.panel.add('panel', undefined, "Padding Type:");
+        dlg.paddingTypePanel.alignment = ['left','top'];
 
-        dlg.paddingType = dlg.paddingGroup.add('panel', undefined, "Padding Type:");
-        dlg.paddingType.alignment = 'fill';
+        // Padding Preferences: Padding Type, Save Padding Data (in data file)
 
+        dlg.paddingTypePanel.paddingPrefs = dlg.paddingTypePanel.add('group');
+        dlg.paddingTypePanel.paddingPrefs.alignment = ['left', 'top'];
 
-        dlg.ddPaddingType = dlg.paddingType.add("dropdownlist");
+        dlg.ddPaddingType = dlg.paddingTypePanel.paddingPrefs.add("dropdownlist");
         dlg.ddPaddingType.alignment = 'left'
 
         dlg.ddPaddingType.add("item", "Uniform");
@@ -321,49 +333,57 @@ function SpriteGenerator()
             selectedIndex = this.selection.index;
             switch (this.selection.index) {
                 case uniformIndex:
-                    dlg.paddingType.paddingOptions.text = 'Uniform Options:'
-                    dlg.paddingType.paddingOptions.uniformPaddingOptions.show();
+                    dlg.paddingTypePanel.paddingOptions.text = 'Uniform Options:'
+                    dlg.paddingTypePanel.paddingOptions.uniformPaddingOptions.show();
                     break;
                 case separateIndex:
-                    dlg.paddingType.paddingOptions.text = 'Separate Options:'
-                    dlg.paddingType.paddingOptions.separatePaddingOptions.show();
+                    dlg.paddingTypePanel.paddingOptions.text = 'Separate Options:'
+                    dlg.paddingTypePanel.paddingOptions.separatePaddingOptions.show();
                     break;
             }
         }
 
-        dlg.paddingType.paddingOptions = dlg.paddingType.add('panel', undefined, 'Options');
-        dlg.paddingType.paddingOptions.alignment = 'fill';
-        dlg.paddingType.paddingOptions.orientation = 'stack';
+        dlg.savePaddingData = dlg.paddingTypePanel.paddingPrefs.add('Checkbox', undefined, 'Save Padding Data');
+        dlg.savePaddingData.alignment = 'left'
+
+        // Padding Options
+
+        dlg.paddingTypePanel.paddingOptions = dlg.paddingTypePanel.add('panel', undefined, 'Options');
+        dlg.paddingTypePanel.paddingOptions.alignment = 'fill';
+        dlg.paddingTypePanel.paddingOptions.orientation = 'stack';
 
         // Uniform Padding Options
-        dlg.paddingType.paddingOptions.uniformPaddingOptions = dlg.paddingType.paddingOptions.add('group');
-        dlg.paddingType.paddingOptions.uniformPaddingOptions.alignment = ['left', 'top'];
 
-        dlg.paddingType.paddingOptions.uniformPaddingOptions.add('StaticText', undefined, 'Padding');
-        dlg.paddingUniform = dlg.paddingType.paddingOptions.uniformPaddingOptions.add('EditText', undefined, paddingUniform);
-        dlg.paddingType.paddingOptions.uniformPaddingOptions.visible = (selectedIndex == uniformIndex);
+        dlg.paddingTypePanel.paddingOptions.uniformPaddingOptions = dlg.paddingTypePanel.paddingOptions.add('group');
+        dlg.paddingTypePanel.paddingOptions.uniformPaddingOptions.alignment = ['left', 'top'];
+
+        dlg.paddingTypePanel.paddingOptions.uniformPaddingOptions.add('StaticText', undefined, 'Padding');
+        dlg.paddingUniform = dlg.paddingTypePanel.paddingOptions.uniformPaddingOptions.add('EditText', undefined, paddingUniform);
+        dlg.paddingTypePanel.paddingOptions.uniformPaddingOptions.visible = (selectedIndex == uniformIndex);
 
         // Separate Padding Options
-        dlg.paddingType.paddingOptions.separatePaddingOptions = dlg.paddingType.paddingOptions.add('group');
-        dlg.paddingType.paddingOptions.separatePaddingOptions.alignment = ['left', 'top'];
+
+        dlg.paddingTypePanel.paddingOptions.separatePaddingOptions = dlg.paddingTypePanel.paddingOptions.add('group');
+        dlg.paddingTypePanel.paddingOptions.separatePaddingOptions.alignment = ['left', 'top'];
         
-        dlg.paddingType.paddingOptions.separatePaddingOptions.add('StaticText', undefined, 'Padding');
-        dlg.paddingType.paddingOptions.separatePaddingOptions.add('StaticText', undefined, 'Left');
-        dlg.paddingLeft = dlg.paddingType.paddingOptions.separatePaddingOptions.add('EditText', undefined, paddingLeft); 
+        dlg.paddingTypePanel.paddingOptions.separatePaddingOptions.add('StaticText', undefined, 'Padding');
+        dlg.paddingTypePanel.paddingOptions.separatePaddingOptions.add('StaticText', undefined, 'Left');
+        dlg.paddingLeft = dlg.paddingTypePanel.paddingOptions.separatePaddingOptions.add('EditText', undefined, paddingLeft); 
         dlg.paddingLeft.characters = 4;
         
-        dlg.paddingType.paddingOptions.separatePaddingOptions.add('StaticText', undefined, 'Top');
-        dlg.paddingTop = dlg.paddingType.paddingOptions.separatePaddingOptions.add('EditText', undefined, paddingTop);
+        dlg.paddingTypePanel.paddingOptions.separatePaddingOptions.add('StaticText', undefined, 'Top');
+        dlg.paddingTop = dlg.paddingTypePanel.paddingOptions.separatePaddingOptions.add('EditText', undefined, paddingTop);
         dlg.paddingTop.characters = 4;
 
-        dlg.paddingType.paddingOptions.separatePaddingOptions.add('StaticText', undefined, 'Right');
-        dlg.paddingRight = dlg.paddingType.paddingOptions.separatePaddingOptions.add('EditText', undefined, paddingRight);
+        dlg.paddingTypePanel.paddingOptions.separatePaddingOptions.add('StaticText', undefined, 'Right');
+        dlg.paddingRight = dlg.paddingTypePanel.paddingOptions.separatePaddingOptions.add('EditText', undefined, paddingRight);
         dlg.paddingRight.characters = 4;
         
-        dlg.paddingType.paddingOptions.separatePaddingOptions.add('StaticText', undefined, 'Bottom');
-        dlg.paddingBottom = dlg.paddingType.paddingOptions.separatePaddingOptions.add('EditText', undefined, paddingBottom); 
+        dlg.paddingTypePanel.paddingOptions.separatePaddingOptions.add('StaticText', undefined, 'Bottom');
+        dlg.paddingBottom = dlg.paddingTypePanel.paddingOptions.separatePaddingOptions.add('EditText', undefined, paddingBottom); 
         dlg.paddingBottom.characters = 4;
-        dlg.paddingType.paddingOptions.separatePaddingOptions.visible = (selectedIndex == separateIndex);
+        dlg.paddingTypePanel.paddingOptions.separatePaddingOptions.visible = (selectedIndex == separateIndex);
+
 
         dlg.panel.docName = dlg.panel.add('StaticText', undefined, 'Document Name ');
         dlg.panel.docName.alignment = ['left', 'top'];
@@ -424,6 +444,6 @@ if (app && app.activeDocument)
 
 function hideAllPaddingPanel(dlg)
 {
-    dlg.paddingType.paddingOptions.uniformPaddingOptions.hide();
-    dlg.paddingType.paddingOptions.separatePaddingOptions.hide();
+    dlg.paddingTypePanel.paddingOptions.uniformPaddingOptions.hide();
+    dlg.paddingTypePanel.paddingOptions.separatePaddingOptions.hide();
 }
