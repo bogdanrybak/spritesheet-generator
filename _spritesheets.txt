@@ -1,0 +1,1 @@
+DustAnimationOutput.png,22,10,4
