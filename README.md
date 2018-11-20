@@ -4,6 +4,9 @@ Spritesheet generator is for those who work with Photoshop's animation functions
 
 Report issues / feature requests on [github](https://github.com/bogdanrybak/spritesheet-generator/issues) or [tweet at me](https://twitter.com/bogdan_rybak)
 
+# Contributors
+- [@SebaschenLiu](https://github.com/SebaschenLiu) - thanks for the awesome padding feature and UI enhancements <3
+
 # Installation
 
 [Download](https://github.com/bogdanrybak/spritesheet-generator/files/2575113/Spritesheet.Generator.zip) the raw version of the script
@@ -58,6 +61,3 @@ each entry uses a new line
 ```
 
 This file exists so that you can setup whatever workflow within your game engine or other tools to read and slice your spritesheets.
-
-# Contributors
-- [@SebaschenLiu](https://github.com/SebaschenLiu) - thanks for the awesome padding feature and UI enhancements <3
