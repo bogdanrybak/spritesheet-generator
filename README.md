@@ -58,3 +58,6 @@ each entry uses a new line
 ```
 
 This file exists so that you can setup whatever workflow within your game engine or other tools to read and slice your spritesheets.
+
+# Contributors
+- [@SebaschenLiu](https://github.com/SebaschenLiu) - thanks for the awesome padding feature and UI enhancements <3
